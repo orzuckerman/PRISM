@@ -1,0 +1,15 @@
+.idea/.gitignore
+.idea/PRISM.iml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/inspectionProfiles/Project_Default.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+.idea/workspace.xml
+datasets/yelp_fdata/yelp_fdata.csv
+datasets/yelp_fdata/__MACOSX/._yelp_fdata.csv
+models/central/*
+models/local/*
+models/local_items/*
+*.pyc
+*.npy
