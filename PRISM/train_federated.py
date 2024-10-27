@@ -245,7 +245,7 @@ class FederatedNCF:
 
                 # Store the recommendations
                 user_item_key = str(user_idx) + '_' + str(item_idx)
-                test_items_lists[user_item_key] = item_idx
+                test_items_lists[user_item_key] = float(y_pred[0])
                 recommendation_lists[user_item_key].extend(top_item_ids)
 
         avg_hr = np.mean(hr_list)
@@ -260,11 +260,17 @@ class FederatedNCF:
 
         recommendation_lists_df = pd.DataFrame(recommendation_lists).T
         recommendation_lists_df.to_csv('recommendation_lists_df.csv')
+        test_items_df = pd.DataFrame([(key, str(values)) for key, values in test_items_lists.items()],
+                          columns=['User_Item', 'Prediction'])
+        epsilon_name = self.differential_privacy_config['epsilon'] if self.differential_privacy_config['state'] else 'no_dp'
+        test_items_df.to_csv(f'predicitons_results_{epsilon_name}.csv', index=False)
 
         return avg_hr, avg_ndcg, avg_rmse, avg_mae, novelty, diversity
 
 
 if __name__ == '__main__':
+    fedmf_seed = 21
+    prifedcamf_seed = 3
     loov = True
     aggregation_epochs = 80
     dataloader = MovielensDatasetLoader(loov=loov)
@@ -276,7 +282,7 @@ if __name__ == '__main__':
 
     differential_privacy_config = {
         'state': True,
-        'epsilon': 10,
+        'epsilon': 5,
         'epsilon_scale': 2000,
         'delta': 1e-5,
         'clip_norm': 1.0
@@ -287,7 +293,7 @@ if __name__ == '__main__':
                            aggregation_epochs=aggregation_epochs, local_epochs=30, batch_size=128,
                            use_context=True, context_dims=context_dims,
                            differential_privacy_config=differential_privacy_config,
-                           unseen_items=unseen_items)
+                           unseen_items=unseen_items, seed=fedmf_seed)
     fed_ncf.train()
     hr, ndcg, rmse, mae, novelty, diversity = fed_ncf.evaluate(test_data)
     print(f'HR: {hr:.4f}, NDCG: {ndcg:.4f}, RMSE: {rmse:.4f}, MAE: {mae:.4f}, '
